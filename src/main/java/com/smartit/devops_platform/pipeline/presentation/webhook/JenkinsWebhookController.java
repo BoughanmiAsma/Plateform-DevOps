@@ -22,7 +22,7 @@ public class JenkinsWebhookController {
 
     @PostMapping("/jenkins")
     public ResponseEntity<Void> handleJenkinsNotification(@RequestBody Map<String, Object> payload) {
-        // Extraction des données envoyées par Jenkins (exemple simplifié)
+        // Extraction des données envoyées par Jenkins
         String executionId = (String) payload.get("id");
         String status = (String) payload.get("result");
         String projectId = (String) payload.get("projectId"); // Jenkins doit l'envoyer
@@ -32,15 +32,13 @@ public class JenkinsWebhookController {
                 null, // pipelineId
                 executionId,
                 status,
-                LocalDateTime.now()
-        );
+                LocalDateTime.now());
 
         // Envoi à RabbitMQ (Production du message)
         rabbitTemplate.convertAndSend(
                 RabbitMQConfig.EXCHANGE,
                 RabbitMQConfig.ROUTING_KEY,
-                event
-        );
+                event);
 
         return ResponseEntity.ok().build();
     }

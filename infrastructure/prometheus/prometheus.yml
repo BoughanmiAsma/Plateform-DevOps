@@ -1,0 +1,20 @@
+global:
+  scrape_interval: 10s
+
+scrape_configs:
+  # 1. Ma Plateforme DevOps (Le Cerveau)
+  - job_name: 'devops-platform-core'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:8080']
+
+  # 2. L'outil de CI/CD (Jenkins)
+  - job_name: 'jenkins'
+    metrics_path: '/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:8085']
+
+  # 3. Future Application déployée (Exemple)
+  # - job_name: 'app-client-immobilier'
+  #   static_configs:
+  #     - targets: ['host.docker.internal:8081']
