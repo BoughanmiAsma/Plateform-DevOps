@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface CiCdPlugin {
     CiCdProvider getProvider();
-    String triggerPipeline(String pipelineName, String branch, String projectId);
+    String triggerPipeline(String pipelineName, String branch, String projectId, java.util.Map<String, String> parameters);
     List<ExternalPipeline> fetchPipelines();
     List<ExternalExecution> fetchExecutions(String pipelineName);
 }

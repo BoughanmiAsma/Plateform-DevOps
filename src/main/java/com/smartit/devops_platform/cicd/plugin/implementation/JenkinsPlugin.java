@@ -22,8 +22,8 @@ public class JenkinsPlugin implements CiCdPlugin {
     }
 
     @Override
-    public String triggerPipeline(String pipelineName, String branch, String projectId) {
-        return jenkinsConnector.triggerJob(pipelineName, branch, projectId);
+    public String triggerPipeline(String pipelineName, String branch, String projectId, java.util.Map<String, String> parameters) {
+        return jenkinsConnector.triggerJob(pipelineName, branch, projectId, parameters);
     }
 
     @Override

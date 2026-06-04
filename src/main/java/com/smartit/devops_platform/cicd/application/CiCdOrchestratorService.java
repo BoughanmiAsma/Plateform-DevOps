@@ -23,12 +23,12 @@ public class CiCdOrchestratorService {
                         Function.identity()));
     }
 
-    public String triggerPipeline(CiCdProvider provider, String pipelineName, String branch, String projectId) {
+    public String triggerPipeline(CiCdProvider provider, String pipelineName, String branch, String projectId, Map<String, String> parameters) {
         CiCdPlugin plugin = plugins.get(provider);
         if (plugin == null) {
             throw new IllegalArgumentException("No plugin found for provider: " + provider);
         }
-        return plugin.triggerPipeline(pipelineName, branch, projectId);
+        return plugin.triggerPipeline(pipelineName, branch, projectId, parameters);
     }
 
     public List<ExternalPipeline> fetchPipelines(CiCdProvider provider) {

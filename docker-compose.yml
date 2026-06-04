@@ -18,6 +18,7 @@ services:
     container_name: nexus
     ports:
       - "8081:8081"
+      - "8082:8082"   # NOUVEAU : Port dédié au registre Docker
     volumes:
       - nexus-data:/nexus-data
     restart: always

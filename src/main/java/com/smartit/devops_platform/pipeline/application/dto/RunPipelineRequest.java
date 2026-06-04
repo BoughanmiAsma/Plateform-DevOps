@@ -7,4 +7,5 @@ public class RunPipelineRequest {
     private String projectId;
     private String pipelineExternalId;
     private String branch;
+    private java.util.Map<String, String> parameters;
 }

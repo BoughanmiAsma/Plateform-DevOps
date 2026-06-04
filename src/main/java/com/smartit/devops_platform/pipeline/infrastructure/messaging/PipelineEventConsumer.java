@@ -9,6 +9,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -19,38 +22,55 @@ public class PipelineEventConsumer {
     @RabbitListener(queues = RabbitMQConfig.QUEUE)
     @Transactional
     public void handlePipelineStatusUpdate(PipelineStatusEvent event) {
-        System.out.println("Message RabbitMQ reçu pour le build : " + event.getExecutionId());
+        System.out.println("Message RabbitMQ reçu pour le build : " + event.getExecutionId()
+                + " | statut: " + event.getStatus()
+                + " | projet: " + event.getProjectId());
 
         if (event.getProjectId() == null) return;
 
         Project project = projectRepository.findById(event.getProjectId())
                 .orElse(null);
 
-        if (project != null) {
-            // Dans ce POC, on cherche l'exécution dans tous les pipelines du projet
-            // pour mettre à jour son statut.
-            ExecutionPipeline update = new ExecutionPipeline(
-                    event.getExecutionId(),
-                    mapStatus(event.getStatus()),
-                    null, // On pourrait passer les dates si besoin
-                    event.getFinishedAt(),
-                    0
-            );
-
-            // On utilise la méthode qu'on a créée précédemment
-            // Note: JenkinsConnector/Webhook devrait idéalement envoyer aussi le pipelineId
-            // Pour l'instant on fait au plus simple pour le flux
-            project.getPipelines().forEach(p -> {
-                try {
-                    project.addExecutionToPipeline(p.getExternalId(), update);
-                } catch (Exception e) {
-                    // Ignorer
-                }
-            });
-
-            projectRepository.save(project);
-            System.out.println("Projet mis à jour avec le statut : " + event.getStatus());
+        if (project == null) {
+            System.out.println("Projet introuvable avec l'ID : " + event.getProjectId());
+            return;
         }
+
+        ExecutionStatus newStatus = mapStatus(event.getStatus());
+
+        // Stratégie de mise à jour :
+        // L'ID envoyé par Jenkins (numéro de build ex: "69") ≠ UUID stocké lors du déclenchement.
+        // On cherche donc la dernière exécution RUNNING dans chaque pipeline et on la remplace
+        // par le nouveau statut reçu du webhook.
+        project.getPipelines().forEach(pipeline -> {
+            // IMPORTANT: collect RUNNING executions to a SEPARATE list FIRST
+            // to avoid ConcurrentModificationException when we modify the list during iteration
+            List<ExecutionPipeline> runningExecs = pipeline.getExecutions().stream()
+                    .filter(e -> e.getStatus() == ExecutionStatus.RUNNING)
+                    .collect(java.util.stream.Collectors.toList());
+
+            if (runningExecs.isEmpty()) return;
+
+            for (ExecutionPipeline runningExec : runningExecs) {
+                LocalDateTime end = event.getFinishedAt() != null ? event.getFinishedAt() : LocalDateTime.now();
+                int durationSecs = (int) java.time.Duration.between(runningExec.getStartedAt(), end).getSeconds();
+
+                ExecutionPipeline updated = new ExecutionPipeline(
+                        runningExec.getExecutionId(),
+                        newStatus,
+                        runningExec.getStartedAt(),
+                        end,
+                        durationSecs
+                );
+                pipeline.addOrUpdateExecution(updated);
+                System.out.println("Pipeline '" + pipeline.getExternalId()
+                        + "' : exécution " + runningExec.getExecutionId()
+                        + " mise à jour → " + newStatus + " (Durée: " + durationSecs + "s)");
+            }
+        });
+
+        projectRepository.save(project);
+        System.out.println("Projet '" + project.getName() + "' sauvegardé avec statut : " + event.getStatus());
     }
 
     private ExecutionStatus mapStatus(String status) {

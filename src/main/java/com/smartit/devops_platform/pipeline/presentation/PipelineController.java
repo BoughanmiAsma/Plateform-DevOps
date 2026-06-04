@@ -17,7 +17,8 @@ public class PipelineController {
     public ExecutionPipeline run(@RequestBody RunPipelineRequest request) {
         return pipelineService.triggerExecution(
                 request.getProjectId(),
-                request.getPipelineExternalId()
+                request.getPipelineExternalId(),
+                request.getParameters()
         );
     }
 }
