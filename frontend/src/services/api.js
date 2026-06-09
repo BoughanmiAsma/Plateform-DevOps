@@ -98,5 +98,16 @@ export const api = {
       throw new Error(text || 'Failed to fetch metrics');
     }
     return await res.json();
+  },
+
+  // Supprimer un projet
+  async deleteProject(projectId) {
+    const res = await fetch(`${API_BASE_URL}/projects/${projectId}`, {
+      method: 'DELETE'
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text || 'Failed to delete project');
+    }
   }
 };

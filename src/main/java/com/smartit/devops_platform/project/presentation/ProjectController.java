@@ -41,4 +41,10 @@ public class ProjectController {
     public Project associatePipelines(@PathVariable String id, @RequestBody AssociatePipelinesRequest request) {
         return projectService.associatePipelines(id, request.getPipelineIds());
     }
+
+    @DeleteMapping("/{id}")
+    public org.springframework.http.ResponseEntity<Void> deleteProject(@PathVariable String id) {
+        projectService.deleteProject(id);
+        return org.springframework.http.ResponseEntity.noContent().build();
+    }
 }

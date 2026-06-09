@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function Projects({ projects, onOpenModal, onRunPipeline, env }) {
+export default function Projects({ projects, onOpenModal, onRunPipeline, onDeleteProject, env }) {
   // Filtrer les projets par l'environnement sélectionné
   const filteredProjects = projects.filter(p => env === 'Global' || p.environment === env);
 
@@ -93,7 +93,20 @@ export default function Projects({ projects, onOpenModal, onRunPipeline, env }) 
                     )}
                   </div>
 
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                    <button
+                      className="btn-danger"
+                      title="Delete Project"
+                      style={{ padding: '0.4rem', fontSize: '1rem', minWidth: '32px' }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (window.confirm(`Are you sure you want to delete ${project.name}?`)) {
+                          onDeleteProject(project.id);
+                        }
+                      }}
+                    >
+                      🗑️
+                    </button>
                     <button
                       className="btn-secondary"
                       style={{ padding: '0.4rem 0.8rem', fontSize: '0.75rem' }}

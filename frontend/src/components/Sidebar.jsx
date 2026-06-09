@@ -19,52 +19,48 @@ export default function Sidebar({ currentPage, setPage }) {
       </div>
 
       <div className="sidebar-section">
-        <div className="sidebar-section-title">Platform</div>
-        <ul className="sidebar-menu">
+        <div className="sidebar-section-label">Platform</div>
+        <div className="sidebar-menu">
           {menuItems
             .filter(item => item.section === 'platform')
             .map(item => (
-              <li key={item.id} className="sidebar-item">
-                <a
-                  className={`sidebar-link ${currentPage === item.id ? 'active' : ''}`}
-                  onClick={() => setPage(item.id)}
-                >
-                  <span className="sidebar-link-icon">{item.icon}</span>
-                  <span>{item.label}</span>
-                </a>
-              </li>
+              <div
+                key={item.id}
+                className={`sidebar-item ${currentPage === item.id ? 'active' : ''}`}
+                onClick={() => setPage(item.id)}
+              >
+                <span className="sidebar-icon">{item.icon}</span>
+                <span>{item.label}</span>
+              </div>
             ))}
-        </ul>
+        </div>
       </div>
 
       <div className="sidebar-section">
-        <div className="sidebar-section-title">Observability</div>
-        <ul className="sidebar-menu">
+        <div className="sidebar-section-label">Observability</div>
+        <div className="sidebar-menu">
           {menuItems
             .filter(item => item.section === 'observability')
             .map(item => (
-              <li key={item.id} className="sidebar-item">
-                <a
-                  className={`sidebar-link ${currentPage === item.id ? 'active' : ''}`}
-                  onClick={() => setPage(item.id)}
-                >
-                  <span className="sidebar-link-icon">{item.icon}</span>
-                  <span>{item.label}</span>
-                </a>
-              </li>
+              <div
+                key={item.id}
+                className={`sidebar-item ${currentPage === item.id ? 'active' : ''}`}
+                onClick={() => setPage(item.id)}
+              >
+                <span className="sidebar-icon">{item.icon}</span>
+                <span>{item.label}</span>
+              </div>
             ))}
-        </ul>
+        </div>
       </div>
 
       <div className="sidebar-user">
-        <img
-          src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=100"
-          alt="Alex Chen"
-          className="avatar"
-        />
-        <div className="user-info">
-          <span className="user-name">Alex Chen</span>
-          <span className="user-role">Lead DevOps</span>
+        <div className="sidebar-avatar">
+          AC
+        </div>
+        <div className="sidebar-user-info">
+          <div className="sidebar-user-name">Alex Chen</div>
+          <div className="sidebar-user-role">Lead DevOps</div>
         </div>
       </div>
     </aside>

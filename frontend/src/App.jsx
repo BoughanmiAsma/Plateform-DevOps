@@ -39,6 +39,15 @@ export default function App() {
     loadProjects();
   }, []);
 
+  const handleDeleteProject = async (projectId) => {
+    try {
+      await api.deleteProject(projectId);
+      await loadProjects();
+    } catch (err) {
+      alert(`Failed to delete project: ${err.message}`);
+    }
+  };
+
   // Gérer le changement de thème
   const toggleTheme = () => {
     setIsLightMode(prev => {
@@ -124,6 +133,7 @@ export default function App() {
             projects={projects}
             onOpenModal={handleOpenModal}
             onRunPipeline={handleRunPipeline}
+            onDeleteProject={handleDeleteProject}
             env={env}
           />
         );
