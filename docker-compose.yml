@@ -1,6 +1,17 @@
-version: '3.8'
-
 services:
+  jenkins:
+    image: jenkins/jenkins:lts
+    container_name: jenkins
+    user: root
+    ports:
+      - "8085:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+
+
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
@@ -18,7 +29,6 @@ services:
     container_name: nexus
     ports:
       - "8081:8081"
-      - "8082:8082"   # NOUVEAU : Port dédié au registre Docker
     volumes:
       - nexus-data:/nexus-data
     restart: always
@@ -37,4 +47,5 @@ services:
 
 volumes:
   rabbitmq_data:
-  nexus-data:
+  nexus-data:    
+  jenkins_home:
