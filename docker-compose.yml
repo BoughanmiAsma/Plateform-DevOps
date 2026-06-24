@@ -10,7 +10,7 @@ services:
       - jenkins_home:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
     restart: unless-stopped
-    sonarqube:
+  sonarqube:
     image: sonarqube:community
     container_name: sonarqube
     ports:
