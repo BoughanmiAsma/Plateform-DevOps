@@ -10,7 +10,20 @@ services:
       - jenkins_home:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
     restart: unless-stopped
-
+    sonarqube:
+    image: sonarqube:community
+    container_name: sonarqube
+    ports:
+      - "9000:9000"
+    environment:
+      - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
+      - JAVA_OPTS=-Xmx512m -Xms128m
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
+      - sonarqube_temp:/opt/sonarqube/temp
+    restart: unless-stopped
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -49,3 +62,11 @@ volumes:
   rabbitmq_data:
   nexus-data:    
   jenkins_home:
+    sonarqube_data:
+    name: sonarqube_data
+  sonarqube_extensions:
+    name: sonarqube_extensions
+  sonarqube_logs:
+    name: sonarqube_logs
+  sonarqube_temp:
+    name: sonarqube_temp
