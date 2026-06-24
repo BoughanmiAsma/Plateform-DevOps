@@ -35,14 +35,27 @@ public class JenkinsConnector {
     @Value("${jenkins.api-token:dummy-token}")
     private String apiToken;
 
-    public String triggerJob(String jobName, String branch, String projectId) {
+    public String triggerJob(String jobName, String branch, String projectId, java.util.Map<String, String> parameters) {
         String url = baseUrl + "/job/" + jobName + "/buildWithParameters";
         HttpHeaders headers = createHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         
-        // On passe la branche ET l'ID du projet à Jenkins
-        String body = "BRANCH=" + branch + "&PROJECT_ID=" + projectId;
+        StringBuilder bodyBuilder = new StringBuilder();
+        // Toujours passer BRANCH et PROJECT_ID comme base
+        bodyBuilder.append("BRANCH=").append(branch != null ? branch : "main");
+        bodyBuilder.append("&PROJECT_ID=").append(projectId);
         
+        // Ajouter les autres paramètres dynamiques
+        if (parameters != null) {
+            for (java.util.Map.Entry<String, String> entry : parameters.entrySet()) {
+                // Eviter de dupliquer BRANCH et PROJECT_ID s'ils sont dans la map
+                if (!entry.getKey().equals("BRANCH") && !entry.getKey().equals("PROJECT_ID")) {
+                    bodyBuilder.append("&").append(entry.getKey()).append("=").append(entry.getValue());
+                }
+            }
+        }
+        
+        String body = bodyBuilder.toString();
         HttpEntity<String> request = new HttpEntity<>(body, headers);
 
         restTemplate.exchange(url, HttpMethod.POST, request, Void.class);

@@ -27,6 +27,7 @@ C:\Users\asmab\Desktop\PlateformDevOps\src\main\java\com\smartit\devops_platform
 C:\Users\asmab\Desktop\PlateformDevOps\src\main\java\com\smartit\devops_platform\project\infrastructure\persistence\entity\PipelineEntity.java
 C:\Users\asmab\Desktop\PlateformDevOps\src\main\java\com\smartit\devops_platform\project\domain\model\Project.java
 C:\Users\asmab\Desktop\PlateformDevOps\src\main\java\com\smartit\devops_platform\cicd\domain\enums\CiCdProvider.java
+C:\Users\asmab\Desktop\PlateformDevOps\src\main\java\com\smartit\devops_platform\config\WebCorsConfig.java
 C:\Users\asmab\Desktop\PlateformDevOps\src\main\java\com\smartit\devops_platform\pipeline\presentation\PipelineController.java
 C:\Users\asmab\Desktop\PlateformDevOps\src\main\java\com\smartit\devops_platform\pipeline\domain\repository\PipelineRepository.java
 C:\Users\asmab\Desktop\PlateformDevOps\src\main\java\com\smartit\devops_platform\observability\infrastructure\prometheus\connector\PrometheusConnector.java
@@ -38,6 +39,7 @@ C:\Users\asmab\Desktop\PlateformDevOps\src\main\java\com\smartit\devops_platform
 C:\Users\asmab\Desktop\PlateformDevOps\src\main\java\com\smartit\devops_platform\pipeline\application\event\PipelineStatusEvent.java
 C:\Users\asmab\Desktop\PlateformDevOps\src\main\java\com\smartit\devops_platform\pipeline\domain\model\Pipeline.java
 C:\Users\asmab\Desktop\PlateformDevOps\src\main\java\com\smartit\devops_platform\project\presentation\ProjectController.java
+C:\Users\asmab\Desktop\PlateformDevOps\src\main\java\com\smartit\devops_platform\pipeline\infrastructure\StuckExecutionCleanupRunner.java
 C:\Users\asmab\Desktop\PlateformDevOps\src\main\java\com\smartit\devops_platform\pipeline\application\PipelineService.java
 C:\Users\asmab\Desktop\PlateformDevOps\src\main\java\com\smartit\devops_platform\pipeline\domain\model\ExecutionPipeline.java
 C:\Users\asmab\Desktop\PlateformDevOps\src\main\java\com\smartit\devops_platform\cicd\plugin\contract\CiCdPlugin.java

@@ -42,4 +42,9 @@ public class ProjectRepositoryImpl implements ProjectRepository {
                 .map(ProjectMapper::toDomain)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public boolean existsById(String projectId) {
+        return jpaRepository.existsById(UUID.fromString(projectId));
+    }
 }

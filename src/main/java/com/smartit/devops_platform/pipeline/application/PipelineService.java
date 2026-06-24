@@ -26,7 +26,7 @@ public class PipelineService {
     /**
      * 🎯 Use case principal : déclencher une exécution pipeline
      */
-    public ExecutionPipeline triggerExecution(String projectId, String pipelineExternalId) {
+    public ExecutionPipeline triggerExecution(String projectId, String pipelineExternalId, java.util.Map<String, String> parameters) {
         // 1. Charger l’agrégat
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new RuntimeException("Project not found"));
@@ -34,12 +34,17 @@ public class PipelineService {
         // 2. Récupérer pipeline
         Pipeline pipeline = project.getPipelineByExternalId(pipelineExternalId);
 
+        // Extraire branch des parameters ou par défaut
+        String branch = (parameters != null && parameters.containsKey("BRANCH")) ? parameters.get("BRANCH") : 
+                        (pipeline.getBranch() != null ? pipeline.getBranch() : "main");
+
         // 3. Trigger via orchestrator
         String executionId = orchestrator.triggerPipeline(
                 pipeline.getProvider(),
                 pipeline.getName(),
-                pipeline.getBranch() != null ? pipeline.getBranch() : "main",
-                projectId
+                branch,
+                projectId,
+                parameters
         );
 
         // 4. Créer execution métier

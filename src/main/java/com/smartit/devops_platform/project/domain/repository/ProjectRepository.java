@@ -9,4 +9,5 @@ public interface ProjectRepository {
     List<Project> findAll();
     void save(Project project);
     void deleteById(String projectId);
+    boolean existsById(String projectId);
 }
