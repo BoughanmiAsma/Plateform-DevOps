@@ -62,7 +62,7 @@ volumes:
   rabbitmq_data:
   nexus-data:    
   jenkins_home:
-    sonarqube_data:
+  sonarqube_data:
     name: sonarqube_data
   sonarqube_extensions:
     name: sonarqube_extensions
