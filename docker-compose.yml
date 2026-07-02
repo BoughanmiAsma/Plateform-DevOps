@@ -2,7 +2,9 @@ version: "3.8"
 
 services:
   jenkins:
-    image: jenkins/jenkins:lts
+    build:
+      context: .
+      dockerfile: Dockerfile.jenkins
     container_name: jenkins
     user: root
     ports:
@@ -13,6 +15,8 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - devops-network
+    environment:
+      - DOCKER_HOST=unix:///var/run/docker.sock
     restart: unless-stopped
 
   sonarqube:
@@ -52,6 +56,7 @@ services:
     container_name: nexus
     ports:
       - "8081:8081"
+      - "8082:8082"
     volumes:
       - nexus-data:/nexus-data
     networks:
