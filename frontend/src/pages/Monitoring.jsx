@@ -26,7 +26,7 @@ export default function Monitoring({ env }) {
       setMetrics({ cpu, memory, rps, errorRate });
     } catch (err) {
       console.error("Failed to load metrics", err);
-      setError("Could not connect to Prometheus. Verify that Prometheus is running at http://localhost:9090");
+      setError("Could not connect to Prometheus. Verify that Prometheus is running at http://localhost:9091");
     } finally {
       setLoading(false);
     }

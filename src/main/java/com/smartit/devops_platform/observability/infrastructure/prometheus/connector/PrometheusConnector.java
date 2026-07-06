@@ -17,21 +17,23 @@ public class PrometheusConnector {
     private String baseUrl;
 
     public PrometheusResponse queryRange(String query, String start, String end, String step) {
-        String url = UriComponentsBuilder.fromHttpUrl(baseUrl + "/api/v1/query_range")
+        java.net.URI uri = UriComponentsBuilder.fromHttpUrl(baseUrl + "/api/v1/query_range")
                 .queryParam("query", query)
                 .queryParam("start", start)
                 .queryParam("end", end)
                 .queryParam("step", step)
-                .toUriString();
+                .build()
+                .toUri();
 
-        return restTemplate.getForObject(url, PrometheusResponse.class);
+        return restTemplate.getForObject(uri, PrometheusResponse.class);
     }
 
     public PrometheusResponse queryInstant(String query) {
-        String url = UriComponentsBuilder.fromHttpUrl(baseUrl + "/api/v1/query")
+        java.net.URI uri = UriComponentsBuilder.fromHttpUrl(baseUrl + "/api/v1/query")
                 .queryParam("query", query)
-                .toUriString();
+                .build()
+                .toUri();
 
-        return restTemplate.getForObject(url, PrometheusResponse.class);
+        return restTemplate.getForObject(uri, PrometheusResponse.class);
     }
 }
