@@ -76,21 +76,19 @@ export const api = {
   // Récupérer les métriques réelles d'observabilité (Prometheus)
   async getMetrics(metricName, minutes = 60) {
     let query = '';
+
     if (metricName === 'cpu') {
-      // Requête Prometheus pour le CPU
-      query = 'system_cpu_usage';
+      query = 'system_cpu_usage{namespace="immo-dev"}';
     } else if (metricName === 'memory') {
-      // Requête Prometheus pour la JVM Memory
-      query = 'jvm_memory_used_bytes';
+      query = 'jvm_memory_used_bytes{namespace="immo-dev"}';
     } else if (metricName === 'rps') {
-      // Requête Prometheus pour Requests Per Second
-      query = 'http_server_requests_seconds_count';
+      query = 'rate(http_server_requests_seconds_count{namespace="immo-dev"}[1m])';
     } else if (metricName === 'errorRate') {
-      // Requête Prometheus pour Taux d'erreurs
-      query = 'http_server_requests_seconds_count{status=~"5.."}';
+      query = 'rate(http_server_requests_seconds_count{namespace="immo-dev",status=~"5.."}[1m])';
     } else {
       query = metricName;
     }
+
 
     const res = await fetch(`${API_BASE_URL}/observability/metrics?query=${encodeURIComponent(query)}&minutes=${minutes}`);
     if (!res.ok) {

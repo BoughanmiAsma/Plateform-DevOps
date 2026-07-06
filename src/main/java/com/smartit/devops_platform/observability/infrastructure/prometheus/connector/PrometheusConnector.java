@@ -13,7 +13,7 @@ public class PrometheusConnector {
 
     private final RestTemplate restTemplate;
 
-    @Value("${prometheus.base-url:http://localhost:9090}")
+    @Value("${prometheus.base-url:http://localhost:9091}")
     private String baseUrl;
 
     public PrometheusResponse queryRange(String query, String start, String end, String step) {
