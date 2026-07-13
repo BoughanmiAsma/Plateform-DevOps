@@ -6,4 +6,5 @@ import lombok.Data;
 public class CreateProjectRequest {
     private String name;
     private String repositoryUrl;
+    private String k8sNamespace;  // Optional: Kubernetes namespace for Prometheus metrics
 }

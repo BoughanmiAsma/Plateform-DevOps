@@ -24,6 +24,7 @@ public class Project {
     private String defaultBranch;
     private ProjectEnvironment environment;
     private boolean active;
+    private String k8sNamespace; // Kubernetes namespace for Prometheus queries
     private final LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private final List<Pipeline> pipelines;
@@ -60,6 +61,11 @@ public class Project {
         if (name == null || name.isBlank()) throw new IllegalArgumentException("Project name cannot be empty");
         this.name = name;
         this.description = description;
+        touch();
+    }
+
+    public void setK8sNamespace(String k8sNamespace) {
+        this.k8sNamespace = k8sNamespace;
         touch();
     }
 

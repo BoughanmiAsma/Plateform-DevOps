@@ -24,5 +24,6 @@ public class PrometheusResponse {
     public static class PrometheusResult {
         private Map<String, String> metric;
         private List<Object[]> values; // [timestamp, value]
+        private Object[] value; // [timestamp, value] for instant queries
     }
 }

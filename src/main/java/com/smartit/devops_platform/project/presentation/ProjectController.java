@@ -19,7 +19,7 @@ public class ProjectController {
 
     @PostMapping
     public Project createProject(@RequestBody CreateProjectRequest request) {
-        return projectService.createProject(request.getName(), request.getRepositoryUrl());
+        return projectService.createProject(request.getName(), request.getRepositoryUrl(), request.getK8sNamespace());
     }
 
     @GetMapping

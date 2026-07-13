@@ -26,6 +26,9 @@ public class ProjectMapper {
         if (entity.getEnvironment() != null) {
             project.changeEnvironment(ProjectEnvironment.valueOf(entity.getEnvironment()));
         }
+        if (entity.getK8sNamespace() != null) {
+            project.setK8sNamespace(entity.getK8sNamespace());
+        }
         if (!entity.isActive()) project.deactivate();
 
         if (entity.getPipelines() != null) {
@@ -76,6 +79,7 @@ public class ProjectMapper {
         entity.setActive(domain.isActive());
         entity.setCreatedAt(domain.getCreatedAt());
         entity.setUpdatedAt(domain.getUpdatedAt());
+        entity.setK8sNamespace(domain.getK8sNamespace());
 
         if (domain.getPipelines() != null) {
             List<PipelineEntity> pipelineEntities = domain.getPipelines().stream()

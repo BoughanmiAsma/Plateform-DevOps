@@ -22,11 +22,11 @@ export const api = {
   },
 
   // Créer un projet
-  async createProject(name, repositoryUrl) {
+  async createProject(name, repositoryUrl, k8sNamespace = null) {
     const res = await fetch(`${API_BASE_URL}/projects`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, repositoryUrl })
+      body: JSON.stringify({ name, repositoryUrl, k8sNamespace })
     });
     if (!res.ok) {
       const text = await res.text();
@@ -107,5 +107,35 @@ export const api = {
       const text = await res.text();
       throw new Error(text || 'Failed to delete project');
     }
+  },
+
+  // Récupérer la synthèse des coûts (FinOps)
+  async getFinOpsSummary() {
+    const res = await fetch(`${API_BASE_URL}/finops/summary`);
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text || 'Failed to fetch FinOps summary');
+    }
+    return await res.json();
+  },
+
+  // Récupérer les recommandations FinOps
+  async getFinOpsRecommendations() {
+    const res = await fetch(`${API_BASE_URL}/finops/recommendations`);
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text || 'Failed to fetch FinOps recommendations');
+    }
+    return await res.json();
+  },
+
+  // Récupérer les coûts FinOps d'un projet spécifique
+  async getFinOpsProjectCost(projectId) {
+    const res = await fetch(`${API_BASE_URL}/finops/projects/${projectId}`);
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text || 'Failed to fetch FinOps project cost');
+    }
+    return await res.json();
   }
 };

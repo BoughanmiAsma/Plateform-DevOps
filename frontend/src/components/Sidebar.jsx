@@ -6,7 +6,10 @@ export default function Sidebar({ currentPage, setPage }) {
     { id: 'projects', label: 'Projects', icon: '📁', section: 'platform' },
     { id: 'deployments', label: 'Deployments', icon: '🚀', section: 'platform' },
     { id: 'monitoring', label: 'Monitoring', icon: '📈', section: 'observability' },
-    { id: 'plugins', label: 'Plugins', icon: '🔌', section: 'observability' }
+    { id: 'plugins', label: 'Plugins', icon: '🔌', section: 'observability' },
+    { id: 'finops', label: 'FinOps & Coûts', icon: '💳', section: 'finops' },
+    { id: 'observability-report', label: 'Rapport Observabilité', icon: '📄', section: 'reports' },
+    { id: 'finops-report', label: 'Rapport FinOps', icon: '📊', section: 'reports' }
   ];
 
   return (
@@ -41,6 +44,42 @@ export default function Sidebar({ currentPage, setPage }) {
         <div className="sidebar-menu">
           {menuItems
             .filter(item => item.section === 'observability')
+            .map(item => (
+              <div
+                key={item.id}
+                className={`sidebar-item ${currentPage === item.id ? 'active' : ''}`}
+                onClick={() => setPage(item.id)}
+              >
+                <span className="sidebar-icon">{item.icon}</span>
+                <span>{item.label}</span>
+              </div>
+            ))}
+        </div>
+      </div>
+
+      <div className="sidebar-section">
+        <div className="sidebar-section-label">FinOps</div>
+        <div className="sidebar-menu">
+          {menuItems
+            .filter(item => item.section === 'finops')
+            .map(item => (
+              <div
+                key={item.id}
+                className={`sidebar-item ${currentPage === item.id ? 'active' : ''}`}
+                onClick={() => setPage(item.id)}
+              >
+                <span className="sidebar-icon">{item.icon}</span>
+                <span>{item.label}</span>
+              </div>
+            ))}
+        </div>
+      </div>
+
+      <div className="sidebar-section">
+        <div className="sidebar-section-label">Rapports</div>
+        <div className="sidebar-menu">
+          {menuItems
+            .filter(item => item.section === 'reports')
             .map(item => (
               <div
                 key={item.id}

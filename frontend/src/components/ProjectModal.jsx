@@ -5,6 +5,7 @@ export default function ProjectModal({ isOpen, onClose, mode, project, onSuccess
   // Mode peut être 'create' ou 'associate'
   const [name, setName] = useState('');
   const [repoUrl, setRepoUrl] = useState('');
+  const [k8sNamespace, setK8sNamespace] = useState('');
   const [availablePipelines, setAvailablePipelines] = useState([]);
   const [selectedPipelineId, setSelectedPipelineId] = useState('');
   const [selectedPipelines, setSelectedPipelines] = useState([]);
@@ -16,6 +17,7 @@ export default function ProjectModal({ isOpen, onClose, mode, project, onSuccess
       setError('');
       setName('');
       setRepoUrl('');
+      setK8sNamespace('');
       setSelectedPipelineId('');
       setSelectedPipelines([]);
       setAvailablePipelines([]);
@@ -58,7 +60,7 @@ export default function ProjectModal({ isOpen, onClose, mode, project, onSuccess
         }
 
         // 1. Créer le projet dans le backend
-        const newProject = await api.createProject(name.trim(), repoUrl.trim());
+        const newProject = await api.createProject(name.trim(), repoUrl.trim(), k8sNamespace.trim() || null);
         
         // 2. Associer immédiatement le pipeline Jenkins sélectionné
         await api.associatePipelines(newProject.id, [selectedPipelineId]);
@@ -133,6 +135,20 @@ export default function ProjectModal({ isOpen, onClose, mode, project, onSuccess
                   onChange={(e) => setRepoUrl(e.target.value)}
                   className="form-control"
                   required
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">
+                  Kubernetes Namespace
+                  <span style={{color:'var(--text-secondary)', fontWeight:400, marginLeft:'0.5rem'}}>(optionnel — pour les métriques FinOps)</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. immo-dev"
+                  value={k8sNamespace}
+                  onChange={(e) => setK8sNamespace(e.target.value)}
+                  className="form-control"
                 />
               </div>
 

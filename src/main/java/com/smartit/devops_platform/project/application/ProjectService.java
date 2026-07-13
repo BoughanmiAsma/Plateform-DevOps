@@ -22,8 +22,11 @@ public class ProjectService {
     private final ProjectRepository projectRepository;
     private final CiCdOrchestratorService orchestratorService;
 
-    public Project createProject(String name, String repositoryUrl) {
+    public Project createProject(String name, String repositoryUrl, String k8sNamespace) {
         Project project = new Project(UUID.randomUUID(), name, repositoryUrl);
+        if (k8sNamespace != null && !k8sNamespace.isBlank()) {
+            project.setK8sNamespace(k8sNamespace);
+        }
         projectRepository.save(project);
         return project;
     }

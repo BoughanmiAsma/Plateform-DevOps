@@ -6,6 +6,9 @@ import Projects from './pages/Projects';
 import Deployments from './pages/Deployments';
 import Monitoring from './pages/Monitoring';
 import Plugins from './pages/Plugins';
+import FinOps from './pages/FinOps';
+import ObservabilityReport from './pages/reports/ObservabilityReport';
+import FinOpsReport from './pages/reports/FinOpsReport';
 import ProjectModal from './components/ProjectModal';
 import RunBuildModal from './components/RunBuildModal';
 import { api } from './services/api';
@@ -149,6 +152,12 @@ export default function App() {
         return <Monitoring env={env} />;
       case 'plugins':
         return <Plugins />;
+      case 'finops':
+        return <FinOps />;
+      case 'observability-report':
+        return <ObservabilityReport />;
+      case 'finops-report':
+        return <FinOpsReport />;
       case 'dashboard':
       default:
         return (

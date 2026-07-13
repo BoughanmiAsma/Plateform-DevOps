@@ -21,6 +21,7 @@ public class ProjectEntity {
     private String repositoryUrl;
     private String defaultBranch;
     private String environment;
+    private String k8sNamespace;  // Kubernetes namespace for Prometheus metric queries
     private boolean active;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

@@ -47,19 +47,22 @@ public class PrometheusPlugin implements ObservabilityPlugin {
     public Double getInstantValue(String query) {
         PrometheusResponse response = connector.queryInstant(query);
         if (response == null || response.getData() == null || response.getData().getResult().isEmpty()) {
-            return 0.0;
+            return null; // Return null so fallback can be used
         }
 
-        // On récupère la valeur du premier résultat
-        List<Object[]> values = response.getData().getResult().get(0).getValues();
-        if (values == null && response.getData().getResult().get(0).getMetric() != null) {
-            // Dans le cas d'une requête instantanée, Prometheus peut renvoyer "value" au lieu de "values"
-            // Mais queryInstant avec RestTemplate mappe souvent vers values avec un seul point
-            // On gère ici le format standard [timestamp, value]
+        PrometheusResponse.PrometheusResult result = response.getData().getResult().get(0);
+        
+        // For instant queries, Prometheus returns "value" instead of "values"
+        if (result.getValue() != null) {
+            Object[] val = result.getValue();
+            return Double.parseDouble((String) val[1]);
         }
         
-        // Note: queryInstant renvoie souvent un champ "value" au lieu de "values"
-        // Nous allons simplifier pour le POC
-        return 0.0; // À affiner selon le format exact de queryInstant
+        if (result.getValues() != null && !result.getValues().isEmpty()) {
+            Object[] val = result.getValues().get(0);
+            return Double.parseDouble((String) val[1]);
+        }
+
+        return null;
     }
 }
