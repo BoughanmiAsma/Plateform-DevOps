@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { ReactKeycloakProvider } from '@react-keycloak/web';
+import keycloak from './keycloak';
 import Sidebar from './components/Sidebar';
 import Navbar from './components/Navbar';
 import Dashboard from './pages/Dashboard';
@@ -149,11 +151,11 @@ export default function App() {
           />
         );
       case 'monitoring':
-        return <Monitoring env={env} />;
+        return <Monitoring env={env} setPage={setPage} />;
       case 'plugins':
         return <Plugins />;
       case 'finops':
-        return <FinOps />;
+        return <FinOps setPage={setPage} />;
       case 'observability-report':
         return <ObservabilityReport />;
       case 'finops-report':
@@ -171,34 +173,36 @@ export default function App() {
   };
 
   return (
-    <div className="app-container">
-      <Sidebar currentPage={page} setPage={setPage} />
-      
-      <div className="main-wrapper">
-        <Navbar
-          env={env}
-          setEnv={setEnv}
-          isLightMode={isLightMode}
-          toggleTheme={toggleTheme}
+    <ReactKeycloakProvider authClient={keycloak} initOptions={{ onLoad: 'login-required' }}>
+      <div className="app-container">
+        <Sidebar currentPage={page} setPage={setPage} />
+        
+        <div className="main-wrapper">
+          <Navbar
+            env={env}
+            setEnv={setEnv}
+            isLightMode={isLightMode}
+            toggleTheme={toggleTheme}
+          />
+          {renderPage()}
+        </div>
+
+        <ProjectModal
+          isOpen={modalOpen}
+          onClose={() => setModalOpen(false)}
+          mode={modalMode}
+          project={activeProject}
+          onSuccess={handleModalSuccess}
         />
-        {renderPage()}
+
+        <RunBuildModal
+          isOpen={runModalOpen}
+          onClose={() => setRunModalOpen(false)}
+          onSubmit={executePipeline}
+          project={runTarget.project}
+          pipelineId={runTarget.pipelineId}
+        />
       </div>
-
-      <ProjectModal
-        isOpen={modalOpen}
-        onClose={() => setModalOpen(false)}
-        mode={modalMode}
-        project={activeProject}
-        onSuccess={handleModalSuccess}
-      />
-
-      <RunBuildModal
-        isOpen={runModalOpen}
-        onClose={() => setRunModalOpen(false)}
-        onSubmit={executePipeline}
-        project={runTarget.project}
-        pipelineId={runTarget.pipelineId}
-      />
-    </div>
+    </ReactKeycloakProvider>
   );
 }

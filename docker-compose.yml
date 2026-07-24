@@ -76,7 +76,24 @@ services:
       - devops-network
     restart: unless-stopped
 
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0.1
+    container_name: keycloak
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+    command: start-dev --import-realm
+    ports:
+      - "8180:8080"
+    volumes:
+      - keycloak_data:/opt/keycloak/data
+      - ./infrastructure/keycloak:/opt/keycloak/data/import
+    networks:
+      - devops-network
+    restart: unless-stopped
+
 volumes:
+  keycloak_data:
   rabbitmq_data:
   nexus-data:
   jenkins_home:

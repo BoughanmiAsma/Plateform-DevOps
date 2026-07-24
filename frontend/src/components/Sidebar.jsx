@@ -1,15 +1,22 @@
 import React from 'react';
+import { useKeycloak } from '@react-keycloak/web';
 
 export default function Sidebar({ currentPage, setPage }) {
+  const { keycloak } = useKeycloak();
+  
+  const firstName = keycloak?.tokenParsed?.given_name || '';
+  const lastName = keycloak?.tokenParsed?.family_name || '';
+  const fullName = firstName || lastName ? `${firstName} ${lastName}`.trim() : (keycloak?.tokenParsed?.preferred_username || 'Utilisateur');
+  const userInitials = firstName && lastName ? `${firstName[0]}${lastName[0]}`.toUpperCase() : fullName.substring(0, 2).toUpperCase();
+  const userRole = keycloak?.tokenParsed?.realm_access?.roles?.includes('manager') ? 'Manager' : 'DevOps';
+
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: '📊', section: 'platform' },
     { id: 'projects', label: 'Projects', icon: '📁', section: 'platform' },
     { id: 'deployments', label: 'Deployments', icon: '🚀', section: 'platform' },
     { id: 'monitoring', label: 'Monitoring', icon: '📈', section: 'observability' },
     { id: 'plugins', label: 'Plugins', icon: '🔌', section: 'observability' },
-    { id: 'finops', label: 'FinOps & Coûts', icon: '💳', section: 'finops' },
-    { id: 'observability-report', label: 'Rapport Observabilité', icon: '📄', section: 'reports' },
-    { id: 'finops-report', label: 'Rapport FinOps', icon: '📊', section: 'reports' }
+    { id: 'finops', label: 'FinOps & Coûts', icon: '💳', section: 'finops' }
   ];
 
   return (
@@ -75,31 +82,13 @@ export default function Sidebar({ currentPage, setPage }) {
         </div>
       </div>
 
-      <div className="sidebar-section">
-        <div className="sidebar-section-label">Rapports</div>
-        <div className="sidebar-menu">
-          {menuItems
-            .filter(item => item.section === 'reports')
-            .map(item => (
-              <div
-                key={item.id}
-                className={`sidebar-item ${currentPage === item.id ? 'active' : ''}`}
-                onClick={() => setPage(item.id)}
-              >
-                <span className="sidebar-icon">{item.icon}</span>
-                <span>{item.label}</span>
-              </div>
-            ))}
-        </div>
-      </div>
-
-      <div className="sidebar-user">
-        <div className="sidebar-avatar">
-          AC
+      <div className="sidebar-user" style={{ cursor: 'pointer' }} onClick={() => keycloak.logout()}>
+        <div className="sidebar-avatar" title="Se déconnecter">
+          {userInitials}
         </div>
         <div className="sidebar-user-info">
-          <div className="sidebar-user-name">Alex Chen</div>
-          <div className="sidebar-user-role">Lead DevOps</div>
+          <div className="sidebar-user-name" title={fullName}>{fullName}</div>
+          <div className="sidebar-user-role">{userRole}</div>
         </div>
       </div>
     </aside>

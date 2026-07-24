@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
 
-export default function FinOps() {
+export default function FinOps({ setPage }) {
   const [projects, setProjects] = useState([]);
   const [selectedProjectId, setSelectedProjectId] = useState('');
   const [projectFinOps, setProjectFinOps] = useState(null);
@@ -56,26 +56,35 @@ export default function FinOps() {
       <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <h1 className="page-title">Dashboard FinOps</h1>
         
-        <div className="project-selector" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <label style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>Sélectionner un projet :</label>
-          <select 
-            value={selectedProjectId} 
-            onChange={(e) => setSelectedProjectId(e.target.value)}
-            style={{ 
-              padding: '0.5rem 1rem', 
-              borderRadius: '8px', 
-              background: 'var(--surface)', 
-              color: 'var(--text)',
-              border: '1px solid var(--border)',
-              cursor: 'pointer',
-              outline: 'none'
-            }}
+        <div style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+          <div className="project-selector" style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <label style={{ color: 'var(--text-secondary)', fontWeight: 600 }}>Sélectionner un projet :</label>
+            <select 
+              value={selectedProjectId} 
+              onChange={(e) => setSelectedProjectId(e.target.value)}
+              style={{ 
+                padding: '0.5rem 1rem', 
+                borderRadius: '8px', 
+                background: 'var(--surface)', 
+                color: 'var(--text)',
+                border: '1px solid var(--border)',
+                cursor: 'pointer',
+                outline: 'none'
+              }}
+            >
+              <option value="">-- Choisir un projet --</option>
+              {projects.map(p => (
+                <option key={p.id} value={p.id}>{p.name}</option>
+              ))}
+            </select>
+          </div>
+          <button 
+            className="btn btn-primary" 
+            onClick={() => setPage('finops-report')}
+            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
           >
-            <option value="">-- Choisir un projet --</option>
-            {projects.map(p => (
-              <option key={p.id} value={p.id}>{p.name}</option>
-            ))}
-          </select>
+            📊 Générer Rapport
+          </button>
         </div>
       </div>
 

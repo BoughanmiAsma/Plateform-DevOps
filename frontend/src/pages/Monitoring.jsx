@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import MetricChart from '../components/MetricChart';
 
-export default function Monitoring({ env }) {
+export default function Monitoring({ env, setPage }) {
   const [metrics, setMetrics] = useState({
     cpu: null,
     memory: null,
@@ -72,11 +72,18 @@ export default function Monitoring({ env }) {
 
   return (
     <div className="page-content">
-      <div className="page-header">
+      <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div className="page-title-group">
           <h1 className="page-title">Monitoring & Observability</h1>
           <p className="page-subtitle">Real-time metrics and performance data.</p>
         </div>
+        <button 
+          className="btn btn-primary" 
+          onClick={() => setPage('observability-report')}
+          style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+        >
+          📄 Générer Rapport
+        </button>
       </div>
 
       <div className="section-card">
