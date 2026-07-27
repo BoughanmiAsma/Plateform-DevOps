@@ -1,0 +1,85 @@
+# ==========================================================
+# Configuration Alertmanager via Kubernetes Secret
+# (pour kube-prometheus-stack)
+#
+# INSTRUCTIONS D'APPLICATION :
+# 1. Encodez ce fichier en base64 :
+#    cat alertmanager.yml | base64
+# 2. Collez la valeur dans le Secret Kubernetes ci-dessous
+# 3. kubectl apply -f alertmanager-secret.yml
+# ==========================================================
+
+# ---- Fichier alertmanager.yml (contenu du Secret) ----
+global:
+  # Timeout de résolution des alertes (combien de temps après la fin d'une alerte)
+  resolve_timeout: 5m
+
+  # --- Configuration SMTP (à personnaliser) ---
+  smtp_smarthost: 'smtp.gmail.com:587'
+  smtp_from: 'asmaboughanmi2020@gmail.com'
+  smtp_auth_username: 'asmaboughanmi2020@gmail.com'
+  smtp_auth_password: 'bbra ujqy uoyn nrnj'
+  smtp_require_tls: true
+
+# Route principale : toutes les alertes passent par ici
+route:
+  group_by: ['alertname', 'severity']
+  group_wait: 30s       # Attendre 30s avant d'envoyer le premier email (pour grouper)
+  group_interval: 5m    # Intervalle entre les groupes d'alertes
+  repeat_interval: 4h   # Répéter l'alerte si elle persiste (toutes les 4h)
+  receiver: 'ingenieur-devops'
+
+  routes:
+    # Les alertes critiques sont envoyées immédiatement
+    - match:
+        severity: critical
+      receiver: 'ingenieur-devops'
+      group_wait: 10s
+
+    # Les alertes de type warning
+    - match:
+        severity: warning
+      receiver: 'ingenieur-devops'
+
+receivers:
+  - name: 'ingenieur-devops'
+    # ---- Email ----
+    email_configs:
+      - to: 'asmaboughanmi2020@gmail.com'
+        send_resolved: true
+        headers:
+          Subject: '[{{ .Status | toUpper }}] {{ .GroupLabels.alertname }} — Plateforme DevOps'
+        html: |
+          <html>
+          <body style="font-family: Arial, sans-serif; background: #0f172a; color: #e2e8f0; padding: 24px;">
+            <h2 style="color: {{ if eq .Status "firing" }}#f87171{{ else }}#4ade80{{ end }}">
+              {{ if eq .Status "firing" }}🔴 ALERTE ACTIVE{{ else }}✅ ALERTE RÉSOLUE{{ end }}
+            </h2>
+            <p><strong>Plateforme :</strong> SmartIT DevOps Platform</p>
+            {{ range .Alerts }}
+            <div style="background: #1e293b; padding: 16px; border-radius: 8px; margin: 8px 0; border-left: 4px solid #f87171;">
+              <p><strong>Alerte :</strong> {{ .Labels.alertname }}</p>
+              <p><strong>Sévérité :</strong> {{ .Labels.severity | toUpper }}</p>
+              <p><strong>Résumé :</strong> {{ .Annotations.summary }}</p>
+              <p><strong>Détail :</strong> {{ .Annotations.description }}</p>
+              <p><strong>Début :</strong> {{ .StartsAt.Format "02/01/2006 15:04:05" }}</p>
+            </div>
+            {{ end }}
+            <p style="color: #64748b; font-size: 12px;">
+              Ce message est généré automatiquement par Alertmanager — SmartIT DevOps Platform
+            </p>
+          </body>
+          </html>
+
+    # ---- Webhook vers Spring Boot (notification in-platform) ----
+    webhook_configs:
+      - url: 'http://172.19.0.1:8080/api/alerts/webhook'
+        send_resolved: false   # On ne notifie en plateforme que pour les alertes actives
+
+inhibit_rules:
+  # Si une alerte CRITICAL est active, ne pas envoyer la WARNING du même type
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname']

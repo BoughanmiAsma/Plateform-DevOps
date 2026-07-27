@@ -3,6 +3,7 @@ import { ReactKeycloakProvider } from '@react-keycloak/web';
 import keycloak from './keycloak';
 import Sidebar from './components/Sidebar';
 import Navbar from './components/Navbar';
+import NotificationPanel from './components/NotificationPanel';
 import Dashboard from './pages/Dashboard';
 import Projects from './pages/Projects';
 import Deployments from './pages/Deployments';
@@ -11,15 +12,21 @@ import Plugins from './pages/Plugins';
 import FinOps from './pages/FinOps';
 import ObservabilityReport from './pages/reports/ObservabilityReport';
 import FinOpsReport from './pages/reports/FinOpsReport';
+import Docker from './pages/Docker';
 import ProjectModal from './components/ProjectModal';
 import RunBuildModal from './components/RunBuildModal';
 import { api } from './services/api';
+import { useNotifications } from './hooks/useNotifications';
 
 export default function App() {
   const [page, setPage] = useState('dashboard');
   const [env, setEnv] = useState('Global');
   const [projects, setProjects] = useState([]);
   const [isLightMode, setIsLightMode] = useState(false);
+  const [notifPanelOpen, setNotifPanelOpen] = useState(false);
+
+  // Hook de polling des notifications (toutes les 30s)
+  const { notifications, unreadCount, markRead, markAllRead } = useNotifications();
 
   // Modal State
   const [modalOpen, setModalOpen] = useState(false);
@@ -40,9 +47,12 @@ export default function App() {
     }
   };
 
-  useEffect(() => {
-    loadProjects();
-  }, []);
+  // Charger les projets uniquement quand l'authentification réussit
+  const handleKeycloakEvent = (event, error) => {
+    if (event === 'onAuthSuccess') {
+      loadProjects();
+    }
+  };
 
   const handleDeleteProject = async (projectId) => {
     try {
@@ -160,6 +170,8 @@ export default function App() {
         return <ObservabilityReport />;
       case 'finops-report':
         return <FinOpsReport />;
+      case 'docker':
+        return <Docker />;
       case 'dashboard':
       default:
         return (
@@ -173,7 +185,11 @@ export default function App() {
   };
 
   return (
-    <ReactKeycloakProvider authClient={keycloak} initOptions={{ onLoad: 'login-required' }}>
+    <ReactKeycloakProvider 
+      authClient={keycloak} 
+      initOptions={{ onLoad: 'login-required' }}
+      onEvent={handleKeycloakEvent}
+    >
       <div className="app-container">
         <Sidebar currentPage={page} setPage={setPage} />
         
@@ -183,6 +199,8 @@ export default function App() {
             setEnv={setEnv}
             isLightMode={isLightMode}
             toggleTheme={toggleTheme}
+            unreadCount={unreadCount}
+            onOpenNotifications={() => setNotifPanelOpen(true)}
           />
           {renderPage()}
         </div>
@@ -202,6 +220,16 @@ export default function App() {
           project={runTarget.project}
           pipelineId={runTarget.pipelineId}
         />
+
+        {/* Panneau de notifications slide-in */}
+        {notifPanelOpen && (
+          <NotificationPanel
+            notifications={notifications}
+            onMarkRead={markRead}
+            onMarkAllRead={markAllRead}
+            onClose={() => setNotifPanelOpen(false)}
+          />
+        )}
       </div>
     </ReactKeycloakProvider>
   );

@@ -1,0 +1,74 @@
+# ==========================================================
+# Règles d'alertes Prometheus pour la plateforme DevOps
+# À appliquer via : kubectl apply -f alert_rules.yml
+# ==========================================================
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: devops-platform-alerts
+  namespace: monitoring
+  labels:
+    # Ce label est OBLIGATOIRE pour que le kube-prometheus-stack le détecte
+    release: prometheus
+spec:
+  groups:
+    - name: devops_platform.rules
+      interval: 30s
+      rules:
+
+        # -------------------------------------------------------
+        # Règle 1 : Taux d'erreur HTTP > 5% pendant 2 minutes
+        # -------------------------------------------------------
+        - alert: HighErrorRate
+          expr: |
+            (
+              sum(rate(http_server_requests_seconds_count{status=~"5.."}[5m]))
+              /
+              sum(rate(http_server_requests_seconds_count[5m]))
+            ) * 100 > 5
+          for: 2m
+          labels:
+            severity: critical
+            team: devops
+          annotations:
+            summary: "Taux d'erreur HTTP critique (> 5%)"
+            description: >
+              Le taux d'erreurs HTTP 5xx a dépassé 5% pendant 2 minutes.
+              Valeur actuelle : {{ $value | printf "%.2f" }}%.
+              Action requise : vérifier les logs et les pods en erreur.
+
+        # -------------------------------------------------------
+        # Règle 2 : Taux d'erreur HTTP > 2% (avertissement)
+        # -------------------------------------------------------
+        - alert: ElevatedErrorRate
+          expr: |
+            (
+              sum(rate(http_server_requests_seconds_count{status=~"5.."}[5m]))
+              /
+              sum(rate(http_server_requests_seconds_count[5m]))
+            ) * 100 > 2
+          for: 5m
+          labels:
+            severity: warning
+            team: devops
+          annotations:
+            summary: "Taux d'erreur HTTP élevé (> 2%)"
+            description: >
+              Le taux d'erreurs HTTP 5xx dépasse 2% depuis 5 minutes.
+              Valeur actuelle : {{ $value | printf "%.2f" }}%.
+
+        # -------------------------------------------------------
+        # Règle 3 : CPU très élevé sur les pods (> 85%)
+        # -------------------------------------------------------
+        - alert: HighCpuUsage
+          expr: |
+            100 - (avg(rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 85
+          for: 3m
+          labels:
+            severity: critical
+            team: devops
+          annotations:
+            summary: "Utilisation CPU critique (> 85%)"
+            description: >
+              L'utilisation CPU dépasse 85% depuis 3 minutes.
+              Valeur actuelle : {{ $value | printf "%.1f" }}%.

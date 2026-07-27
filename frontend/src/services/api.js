@@ -96,5 +96,99 @@ export const api = {
     const res = await fetch(`${API_BASE_URL}/finops/projects/${projectId}`, { headers: getAuthHeaders() });
     if (!res.ok) throw new Error(await res.text() || 'Failed to fetch FinOps project cost');
     return await res.json();
+  },
+
+  // ---- Notifications ----
+  async getNotifications() {
+    // Endpoint public : pas besoin de JWT
+    const res = await fetch(`${API_BASE_URL}/notifications`);
+    if (!res.ok) throw new Error('Failed to fetch notifications');
+    return await res.json(); // { notifications: [...], unreadCount: N }
+  },
+
+  async markNotificationRead(id) {
+    await fetch(`${API_BASE_URL}/notifications/${id}/read`, { method: 'PUT' });
+  },
+
+  async markAllNotificationsRead() {
+    await fetch(`${API_BASE_URL}/notifications/read-all`, { method: 'PUT' });
+  },
+
+  // ---- Docker ----
+  async getDockerContainers(all = true) {
+    const res = await fetch(`${API_BASE_URL}/docker/containers?all=${all}`);
+    if (!res.ok) throw new Error('Failed to fetch Docker containers');
+    return await res.json();
+  },
+
+  async startDockerContainer(id) {
+    const res = await fetch(`${API_BASE_URL}/docker/containers/${id}/start`, { method: 'POST' });
+    if (!res.ok) throw new Error('Failed to start container');
+    return await res.json();
+  },
+
+  async stopDockerContainer(id) {
+    const res = await fetch(`${API_BASE_URL}/docker/containers/${id}/stop`, { method: 'POST' });
+    if (!res.ok) throw new Error('Failed to stop container');
+    return await res.json();
+  },
+
+  async restartDockerContainer(id) {
+    const res = await fetch(`${API_BASE_URL}/docker/containers/${id}/restart`, { method: 'POST' });
+    if (!res.ok) throw new Error('Failed to restart container');
+    return await res.json();
+  },
+
+  async removeDockerContainer(id, force = false) {
+    const res = await fetch(`${API_BASE_URL}/docker/containers/${id}?force=${force}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error('Failed to remove container');
+    return await res.json();
+  },
+
+  async getDockerContainerLogs(id, tail = 100) {
+    const res = await fetch(`${API_BASE_URL}/docker/containers/${id}/logs?tail=${tail}`);
+    if (!res.ok) throw new Error('Failed to fetch container logs');
+    return await res.json();
+  },
+
+  async getDockerContainerStats(id) {
+    const res = await fetch(`${API_BASE_URL}/docker/containers/${id}/stats`);
+    if (!res.ok) throw new Error('Failed to fetch container stats');
+    return await res.json();
+  },
+
+  async getDockerImages() {
+    const res = await fetch(`${API_BASE_URL}/docker/images`);
+    if (!res.ok) throw new Error('Failed to fetch Docker images');
+    return await res.json();
+  },
+
+  async pullDockerImage(imageName) {
+    const res = await fetch(`${API_BASE_URL}/docker/images/pull`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image: imageName })
+    });
+    if (!res.ok) throw new Error('Failed to pull Docker image');
+    return await res.json();
+  },
+
+  async removeDockerImage(id, force = false) {
+    const res = await fetch(`${API_BASE_URL}/docker/images/${id}?force=${force}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error('Failed to remove Docker image');
+    return await res.json();
+  },
+
+  async getDockerVolumes() {
+    const res = await fetch(`${API_BASE_URL}/docker/volumes`);
+    if (!res.ok) throw new Error('Failed to fetch Docker volumes');
+    return await res.json();
+  },
+
+  async getDockerNetworks() {
+    const res = await fetch(`${API_BASE_URL}/docker/networks`);
+    if (!res.ok) throw new Error('Failed to fetch Docker networks');
+    return await res.json();
   }
 };
+

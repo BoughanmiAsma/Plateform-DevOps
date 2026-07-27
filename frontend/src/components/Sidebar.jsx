@@ -16,6 +16,7 @@ export default function Sidebar({ currentPage, setPage }) {
     { id: 'deployments', label: 'Deployments', icon: '🚀', section: 'platform' },
     { id: 'monitoring', label: 'Monitoring', icon: '📈', section: 'observability' },
     { id: 'plugins', label: 'Plugins', icon: '🔌', section: 'observability' },
+    { id: 'docker', label: 'Docker', icon: '🐳', section: 'platform' },
     { id: 'finops', label: 'FinOps & Coûts', icon: '💳', section: 'finops' }
   ];
 

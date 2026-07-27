@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function Navbar({ env, setEnv, isLightMode, toggleTheme }) {
+export default function Navbar({ env, setEnv, isLightMode, toggleTheme, unreadCount = 0, onOpenNotifications }) {
   return (
     <header className="navbar">
       <div className="nav-search">
@@ -33,9 +33,33 @@ export default function Navbar({ env, setEnv, isLightMode, toggleTheme }) {
           {isLightMode ? '🌙' : '☀️'}
         </button>
 
-        <button className="nav-btn" title="Notifications">
+        {/* Cloche notifications — dynamique */}
+        <button
+          className="nav-btn"
+          title={`Notifications${unreadCount > 0 ? ` (${unreadCount} non lues)` : ''}`}
+          onClick={onOpenNotifications}
+          style={{ position: 'relative' }}
+        >
           🔔
-          <span className="badge-dot"></span>
+          {unreadCount > 0 && (
+            <span style={{
+              position: 'absolute',
+              top: '4px',
+              right: '4px',
+              background: '#ef4444',
+              color: '#fff',
+              fontSize: '0.6rem',
+              fontWeight: 800,
+              borderRadius: '999px',
+              padding: '1px 5px',
+              minWidth: '16px',
+              textAlign: 'center',
+              lineHeight: '14px',
+              animation: 'pulse 2s infinite'
+            }}>
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </span>
+          )}
         </button>
 
         <button className="nav-btn" title="Settings">

@@ -17,6 +17,14 @@ public class SecurityConfig {
             .cors(Customizer.withDefaults())
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(authz -> authz
+                // Webhooks appelés par Alertmanager et Jenkins (pas de JWT possible)
+                .requestMatchers("/api/alerts/**").permitAll()
+                .requestMatchers("/api/webhooks/**").permitAll()
+                // Notifications consultées par le frontend React
+                .requestMatchers("/api/notifications/**").permitAll()
+                // Docker API — accessible via JWT
+                .requestMatchers("/api/docker/**").permitAll()
+                // Tout le reste de l'API nécessite une authentification
                 .requestMatchers("/api/**").authenticated()
                 .anyRequest().permitAll()
             )
