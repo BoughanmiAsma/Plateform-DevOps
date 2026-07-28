@@ -185,7 +185,8 @@ export default function Deployments({ env }) {
                     {formatDate(dep.reconciledAt)}
                   </td>
                 </tr>
-              ))}
+              );
+            })}
 
               {!loading && filteredDeployments.length === 0 && (
                 <tr>
