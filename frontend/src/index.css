@@ -68,7 +68,7 @@
   --bg-secondary: #ffffff;
   --bg-tertiary: #f8fafc;
   --bg-card: #ffffff;
-  --bg-sidebar: #0d1117;
+  --bg-sidebar: #ffffff;
 
   --text-primary: #0f172a;
   --text-secondary: #475569;
@@ -223,7 +223,7 @@ button, input, select, textarea {
   font-family: var(--font-title);
   font-weight: 800;
   font-size: 1.1rem;
-  background: linear-gradient(135deg, #e6edf3 40%, #8b949e);
+  background: linear-gradient(135deg, var(--text-primary) 40%, var(--text-secondary));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -263,13 +263,13 @@ button, input, select, textarea {
 }
 
 .sidebar-item:hover {
-  color: #e6edf3;
-  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
   border-color: var(--border-color);
 }
 
 .sidebar-item.active {
-  color: #e6edf3;
+  color: var(--accent-primary);
   background: rgba(99, 102, 241, 0.12);
   border-color: rgba(99, 102, 241, 0.25);
 }
@@ -329,7 +329,7 @@ button, input, select, textarea {
 .sidebar-user-name {
   font-size: 0.82rem;
   font-weight: 600;
-  color: #e6edf3;
+  color: var(--text-primary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -349,17 +349,18 @@ button, input, select, textarea {
   justify-content: space-between;
   padding: 0 2rem;
   border-bottom: 1px solid var(--border-color);
-  background: rgba(13, 17, 23, 0.8);
+  background: var(--bg-secondary);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   position: sticky;
   top: 0;
   z-index: 9;
   flex-shrink: 0;
+  transition: background-color var(--transition-normal), border-color var(--transition-normal);
 }
 
 :root.light-mode .navbar {
-  background: rgba(255, 255, 255, 0.85);
+  background: #ffffff;
 }
 
 .navbar-search {

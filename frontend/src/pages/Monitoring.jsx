@@ -3,6 +3,7 @@ import { api } from '../services/api';
 import MetricChart from '../components/MetricChart';
 
 export default function Monitoring({ env, setPage }) {
+  const [selectedEnvFilter, setSelectedEnvFilter] = useState('DEV');
   const [metrics, setMetrics] = useState({
     cpu: null,
     memory: null,
@@ -13,14 +14,16 @@ export default function Monitoring({ env, setPage }) {
   const [error, setError] = useState(null);
   const [timeRange, setTimeRange] = useState(60); // minutes
 
+  const activeEnv = env !== 'Global' ? env : selectedEnvFilter;
+
   const fetchAllMetrics = async () => {
     try {
       setError(null);
       const [cpu, memory, rps, errorRate] = await Promise.all([
-        api.getMetrics('cpu', timeRange),
-        api.getMetrics('memory', timeRange),
-        api.getMetrics('rps', timeRange),
-        api.getMetrics('errorRate', timeRange)
+        api.getMetrics('cpu', timeRange, activeEnv),
+        api.getMetrics('memory', timeRange, activeEnv),
+        api.getMetrics('rps', timeRange, activeEnv),
+        api.getMetrics('errorRate', timeRange, activeEnv)
       ]);
 
       setMetrics({ cpu, memory, rps, errorRate });
@@ -68,14 +71,14 @@ export default function Monitoring({ env, setPage }) {
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [timeRange]);
+  }, [timeRange, activeEnv]);
 
   return (
     <div className="page-content">
       <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div className="page-title-group">
           <h1 className="page-title">Monitoring & Observability</h1>
-          <p className="page-subtitle">Real-time metrics and performance data.</p>
+          <p className="page-subtitle">Real-time metrics and performance data for target environment.</p>
         </div>
         <button 
           className="btn btn-primary" 
@@ -91,8 +94,15 @@ export default function Monitoring({ env, setPage }) {
           <select className="filter-select">
             <option>All Projects</option>
           </select>
-          <select className="filter-select" value={env} disabled>
-            <option value={env}>{env === 'Global' ? 'All Environments' : `Environment: ${env}`}</option>
+          <select 
+            className="filter-select"
+            value={activeEnv}
+            onChange={(e) => setSelectedEnvFilter(e.target.value)}
+            disabled={env !== 'Global'}
+          >
+            <option value="DEV">DEV (ns: immo-dev)</option>
+            <option value="STG">STG (ns: immo-stg)</option>
+            <option value="PROD">PROD (ns: immo-prod)</option>
           </select>
           <select className="filter-select">
             <option>All Services</option>

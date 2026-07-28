@@ -59,12 +59,16 @@ export const api = {
     return await res.json();
   },
 
-  async getMetrics(metricName, minutes = 60) {
+  async getMetrics(metricName, minutes = 60, targetEnv = 'DEV') {
+    let ns = 'immo-dev';
+    if (targetEnv === 'PROD') ns = 'immo-prod';
+    else if (targetEnv === 'STG') ns = 'immo-stg';
+
     let query = '';
-    if (metricName === 'cpu') query = 'system_cpu_usage{namespace="immo-dev"}';
-    else if (metricName === 'memory') query = 'jvm_memory_used_bytes{namespace="immo-dev"}';
-    else if (metricName === 'rps') query = 'rate(http_server_requests_seconds_count{namespace="immo-dev"}[1m])';
-    else if (metricName === 'errorRate') query = 'rate(http_server_requests_seconds_count{namespace="immo-dev",status=~"5.."}[1m])';
+    if (metricName === 'cpu') query = `system_cpu_usage{namespace=~"${ns}|.*"}`;
+    else if (metricName === 'memory') query = `jvm_memory_used_bytes{namespace=~"${ns}|.*"}`;
+    else if (metricName === 'rps') query = `rate(http_server_requests_seconds_count{namespace=~"${ns}|.*"}[1m])`;
+    else if (metricName === 'errorRate') query = `rate(http_server_requests_seconds_count{namespace=~"${ns}|.*",status=~"5.."}[1m])`;
     else query = metricName;
 
     const res = await fetch(`${API_BASE_URL}/observability/metrics?query=${encodeURIComponent(query)}&minutes=${minutes}`, { headers: getAuthHeaders() });
@@ -188,6 +192,13 @@ export const api = {
   async getDockerNetworks() {
     const res = await fetch(`${API_BASE_URL}/docker/networks`);
     if (!res.ok) throw new Error('Failed to fetch Docker networks');
+    return await res.json();
+  },
+
+  // ---- ArgoCD ----
+  async getArgoCdDeployments() {
+    const res = await fetch(`${API_BASE_URL}/deployments/argocd`, { headers: getAuthHeaders() });
+    if (!res.ok) throw new Error('Failed to fetch ArgoCD deployments');
     return await res.json();
   }
 };

@@ -3,7 +3,7 @@ import React from 'react';
 export default function Navbar({ env, setEnv, isLightMode, toggleTheme, unreadCount = 0, onOpenNotifications }) {
   return (
     <header className="navbar">
-      <div className="nav-search">
+      <div className="navbar-search">
         <span className="search-icon">🔍</span>
         <input
           type="text"

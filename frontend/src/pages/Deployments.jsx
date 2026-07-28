@@ -1,90 +1,115 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { api } from '../services/api';
 
-export default function Deployments({ projects, onRunPipeline, env }) {
-  const [selectedProjectFilter, setSelectedProjectFilter] = useState('All');
+export default function Deployments({ env }) {
+  const [deployments, setDeployments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [selectedEnvFilter, setSelectedEnvFilter] = useState('All');
 
-  // Extraire tous les déploiements de tous les projets
-  const allDeployments = [];
-  projects.forEach(proj => {
-    if (proj.pipelines) {
-      proj.pipelines.forEach(pip => {
-        if (pip.executions) {
-          pip.executions.forEach((exec, idx) => {
-            // Générer un numéro de version incrémental réaliste basé sur le build
-            const buildNum = exec.executionId.replace(/\D/g, '') || (100 - idx);
-            const version = `v1.${Math.floor(buildNum / 10)}.${buildNum % 10}`;
-
-            allDeployments.push({
-              id: exec.executionId,
-              projectName: proj.name,
-              projectId: proj.id,
-              pipelineId: pip.externalId,
-              environment: proj.environment,
-              version: version,
-              status: exec.status,
-              startedAt: new Date(exec.startedAt),
-              dateString: new Date(exec.startedAt).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
-            });
+  useEffect(() => {
+    let mounted = true;
+    const loadData = async () => {
+      setLoading(true);
+      try {
+        const data = await api.getArgoCdDeployments();
+        if (mounted) {
+          // Trier par date décroissante (si reconciledAt existe)
+          data.sort((a, b) => {
+            if (!a.reconciledAt) return 1;
+            if (!b.reconciledAt) return -1;
+            return new Date(b.reconciledAt) - new Date(a.reconciledAt);
           });
+          setDeployments(data);
         }
-      });
-    }
-  });
+      } catch (err) {
+        if (mounted) setError(err.message);
+      }
+      if (mounted) setLoading(false);
+    };
 
-  // Trier par date décroissante
-  allDeployments.sort((a, b) => b.startedAt - a.startedAt);
+    loadData();
+    // Refresh every 15s
+    const interval = setInterval(loadData, 15000);
+    return () => {
+      mounted = false;
+      clearInterval(interval);
+    };
+  }, []);
 
-  // Appliquer les filtres (Filtre global de la Navbar + Filtres locaux de la page)
-  const filteredDeployments = allDeployments.filter(d => {
-    // Filtrer par le sélecteur global d'environnement de la Navbar
-    if (env !== 'Global' && d.environment !== env) return false;
-    
-    // Filtrer par le sélecteur de projet local de la page
-    if (selectedProjectFilter !== 'All' && d.projectName !== selectedProjectFilter) return false;
+  // Format date
+  const formatDate = (isoString) => {
+    if (!isoString) return '—';
+    return new Date(isoString).toLocaleDateString([], {
+      month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+    });
+  };
 
-    // Filtrer par le sélecteur d'environnement local de la page
-    if (selectedEnvFilter !== 'All' && d.environment !== selectedEnvFilter) return false;
+  const getEnvClass = (ns) => {
+    if (!ns) return 'env-dev';
+    if (ns.includes('prod')) return 'env-prod';
+    if (ns.includes('stg') || ns.includes('staging')) return 'env-stg';
+    return 'env-dev';
+  };
 
+  const getEnvName = (ns) => {
+    if (!ns) return 'Unknown';
+    if (ns.includes('prod')) return 'PROD';
+    if (ns.includes('stg') || ns.includes('staging')) return 'STG';
+    if (ns.includes('dev')) return 'DEV';
+    return ns.toUpperCase();
+  };
+
+  const getStatusColor = (status) => {
+    if (!status) return '#94a3b8'; // Unknown
+    const s = status.toLowerCase();
+    if (s === 'synced' || s === 'healthy') return '#10b981'; // Green
+    if (s === 'outofsync' || s === 'progressing') return '#f59e0b'; // Yellow
+    if (s === 'degraded' || s === 'missing' || s === 'suspended') return '#ef4444'; // Red
+    return '#6366f1';
+  };
+
+  // Appliquer les filtres
+  const filteredDeployments = deployments.filter(d => {
+    const targetNs = d.destinationNamespace || d.namespace;
+    const dEnv = getEnvName(targetNs);
+    // Filtre global (props env)
+    if (env !== 'Global' && dEnv !== env) return false;
+    // Filtre local de la page
+    if (selectedEnvFilter !== 'All' && dEnv !== selectedEnvFilter) return false;
     return true;
   });
 
-  const getEnvClass = (environment) => {
-    switch (environment?.toUpperCase()) {
-      case 'PROD': return 'env-prod';
-      case 'STG': return 'env-stg';
-      case 'DEV':
-      default: return 'env-dev';
-    }
-  };
-
   return (
     <div className="page-content">
-      <div className="page-header">
+      <div className="page-header" style={{ flexWrap: 'wrap', gap: 12 }}>
         <div className="page-title-group">
-          <h1 className="page-title">Deployments History</h1>
-          <p className="page-subtitle">Track all releases across environments.</p>
+          <h1 className="page-title" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ WebkitTextFillColor: 'initial', background: 'none' }}>🐙</span> ArgoCD Deployments
+          </h1>
+          <p className="page-subtitle">Track real Kubernetes releases and synchronization status.</p>
         </div>
+        <button onClick={() => { setLoading(true); api.getArgoCdDeployments().then(setDeployments).finally(() => setLoading(false)) }} 
+          style={{
+            background: 'linear-gradient(135deg, #3b82f6, #6366f1)', color: '#fff',
+            border: 'none', borderRadius: 10, padding: '10px 22px', cursor: 'pointer',
+            fontWeight: 600, fontSize: '0.92rem', transition: 'transform 0.15s',
+            display: 'flex', alignItems: 'center', gap: 8
+          }}
+          onMouseOver={e => e.currentTarget.style.transform = 'scale(1.04)'}
+          onMouseOut={e => e.currentTarget.style.transform = 'scale(1)'}
+        >
+          🔄 Actualiser
+        </button>
       </div>
 
       <div className="section-card">
         <div className="filters-row">
           <select
-            value={selectedProjectFilter}
-            onChange={(e) => setSelectedProjectFilter(e.target.value)}
-            className="filter-select"
-          >
-            <option value="All">All Projects</option>
-            {Array.from(new Set(projects.map(p => p.name))).map(name => (
-              <option key={name} value={name}>{name}</option>
-            ))}
-          </select>
-
-          <select
             value={selectedEnvFilter}
             onChange={(e) => setSelectedEnvFilter(e.target.value)}
             className="filter-select"
-            disabled={env !== 'Global'} // Désactivé si un env global est déjà sélectionné
+            disabled={env !== 'Global'}
           >
             <option value="All">All Environments</option>
             <option value="PROD">Production (PROD)</option>
@@ -93,62 +118,79 @@ export default function Deployments({ projects, onRunPipeline, env }) {
           </select>
         </div>
 
+        {error && (
+          <div style={{ padding: 12, background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', borderRadius: 8, marginBottom: 16 }}>
+            ⚠️ Erreur: {error}
+          </div>
+        )}
+
         <div className="table-responsive">
           <table className="custom-table">
             <thead>
               <tr>
-                <th>Project / Service</th>
+                <th>Application</th>
                 <th>Environment</th>
-                <th>Version</th>
-                <th>Status</th>
-                <th>Date</th>
-                <th>Action</th>
+                <th>Sync Status</th>
+                <th>Health Status</th>
+                <th>Version (Revision)</th>
+                <th>Last Synced</th>
               </tr>
             </thead>
             <tbody>
-              {filteredDeployments.map((dep) => (
-                <tr key={dep.id}>
-                  <td>
-                    <div className="project-meta">
-                      <span className="project-name-cell">{dep.projectName}</span>
-                      <span className="project-repo-cell">{dep.pipelineId}</span>
-                    </div>
+              {loading && deployments.length === 0 ? (
+                <tr>
+                  <td colSpan="6" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
+                    ⏳ Chargement des déploiements depuis ArgoCD...
                   </td>
+                </tr>
+              ) : filteredDeployments.map((dep) => {
+                const targetNs = dep.destinationNamespace || dep.namespace;
+                return (
+                  <tr key={dep.uid || dep.name}>
+                    <td>
+                      <div className="project-meta">
+                        <span className="project-name-cell" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          {dep.name}
+                        </span>
+                        <span className="project-repo-cell">ns: {targetNs}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <span className={`env-badge ${getEnvClass(targetNs)}`}>
+                        {getEnvName(targetNs)}
+                      </span>
+                    </td>
                   <td>
-                    <span className={`env-badge ${getEnvClass(dep.environment)}`}>
-                      {dep.environment}
+                    <span style={{
+                      display: 'inline-block', padding: '4px 10px', borderRadius: 12, fontSize: '0.8rem',
+                      fontWeight: 600, background: `${getStatusColor(dep.syncStatus)}20`, color: getStatusColor(dep.syncStatus)
+                    }}>
+                      {dep.syncStatus}
                     </span>
                   </td>
                   <td>
-                    <code style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem' }}>
-                      {dep.version}
+                    <span style={{
+                      display: 'inline-block', padding: '4px 10px', borderRadius: 12, fontSize: '0.8rem',
+                      fontWeight: 600, background: `${getStatusColor(dep.healthStatus)}20`, color: getStatusColor(dep.healthStatus)
+                    }}>
+                      {dep.healthStatus}
+                    </span>
+                  </td>
+                  <td>
+                    <code style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
+                      {dep.revision ? dep.revision.substring(0, 7) : '—'}
                     </code>
                   </td>
                   <td>
-                    <span className={`status-badge status-${dep.status.toLowerCase()}`}>
-                      {dep.status}
-                    </span>
-                  </td>
-                  <td>{dep.dateString}</td>
-                  <td>
-                    <div style={{ display: 'flex', gap: '0.75rem' }}>
-                      <span className="action-link" onClick={() => alert(`Viewing logs for deployment ${dep.id}`)}>
-                        View
-                      </span>
-                      {dep.status === 'FAILED' && (
-                        <span className="action-link" style={{ color: 'var(--status-running)' }} onClick={() => onRunPipeline(dep.projectId, dep.pipelineId)}>
-                          Retry
-                        </span>
-                      )}
-                    </div>
+                    {formatDate(dep.reconciledAt)}
                   </td>
                 </tr>
               ))}
 
-              {filteredDeployments.length === 0 && (
+              {!loading && filteredDeployments.length === 0 && (
                 <tr>
                   <td colSpan="6" style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>
-                    No deployments matching filters.
+                    Aucun déploiement trouvé dans ArgoCD pour ces filtres.
                   </td>
                 </tr>
               )}
