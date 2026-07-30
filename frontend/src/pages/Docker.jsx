@@ -109,8 +109,10 @@ export default function Docker() {
 
   const openLogs = async (containerId, name) => {
     try {
-      const logs = await api.getDockerContainerLogs(containerId, 200);
-      setLogsPanel({ id: containerId, name, logs });
+      const result = await api.getDockerContainerLogs(containerId, 200);
+      // L'API retourne { logs: "..." } — on extrait le champ texte
+      const logsText = typeof result === 'string' ? result : (result?.logs || '(aucun log disponible)');
+      setLogsPanel({ id: containerId, name, logs: logsText });
     } catch (err) {
       alert(`Erreur logs: ${err.message}`);
     }
