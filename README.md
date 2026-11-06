@@ -42,6 +42,14 @@ The **SmartIT DevOps Platform** is a comprehensive, production-ready DevOps mana
 
 The platform integrates best-in-class open-source DevOps tools (Jenkins, SonarQube, Nexus, Prometheus, ArgoCD) and exposes them through a modern React dashboard secured by Keycloak OAuth2/JWT authentication.
 
+
+---
+
+## 🎬 Demo
+
+[![Voir la démo](docs/demo-preview.png)](assets/demo.mp4)
+
+▶ [Regarder la vidéo de démonstration (6 min 40)](assets/demo.mp4)
 ---
 
 ## ✨ Key Features
